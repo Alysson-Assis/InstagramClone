@@ -2,8 +2,8 @@ import React, { Component } from 'react'
 import { View, Button, TextInput } from 'react-native'
 
 
-import { getAuth } from 'firebase/auth'
-import { getFirestore, collection, addDoc } from 'firebase/firestore';
+import { createUserWithEmailAndPassword, getAuth } from 'firebase/auth'
+import { getFirestore,setDoc, doc } from 'firebase/firestore';
 
 
 export class Register extends Component {
@@ -22,23 +22,25 @@ export class Register extends Component {
         const auth = getAuth()
         const db = getFirestore()
         const { email, password, name } = this.state;
-        auth.createUserWithEmailAndPassword(auth, email, password ) // dados do usuário ok
+        createUserWithEmailAndPassword(auth, email, password ) 
+        // dados do usuário ok
+        
+           .then(async (userCredencial) => {
+                const user = userCredencial.user;
+                const uid = user.uid
+                console.log(user)
 
-           .then(async (userCredential) => {
-            const user = userCredential.user;
-            const uid = user.uid;
-            console.log(user);
-
-            try{
-                const docRef = await setDoc(doc(db, "users", uid), {
+                try {
+                    const docRef = await setDoc(doc(db, "users", uid), {
                     name: name,
                     email: email,
-                });
+                    });
 
-            }catch (e){
-                console.log("Error: ", e)
-            }
-        })
+
+                }catch (e) {
+                    console.error("Error: ", e)
+                }                        
+            })
             .catch((error) => {
                 console.log(error)
         })
